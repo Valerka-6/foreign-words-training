@@ -43,6 +43,7 @@ const btnExam = document.querySelector('#exam');
 const examCards = document.querySelector('#exam-cards');
 const shuffleWords = document.querySelector('#shuffle-words');
 const time = document.querySelector('#time');
+
 let index = 0;
 
 
@@ -62,6 +63,8 @@ function renderCard(arr) {
 
 renderCard(currentWords);
 
+document.querySelector('#total-word').textContent = currentWords.length;
+
 function getRandomCard(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
 }
@@ -71,7 +74,7 @@ shuffleWords.addEventListener('click', () => {
 });
 
 function showProgress() {
-    document.querySelector('#words-progress').value = index * 25;
+    document.querySelector('#words-progress').value = index * (100 / (currentWords.length - 1));
     document.querySelector('#current-word').textContent = index + 1;
     makeCard(currentWords[index]);
 }
@@ -83,7 +86,7 @@ flipCard.onclick = function() {
 btnNext.onclick = function() {
     index = ++index;
     btnBack.disabled = false;
-    if (index == 4) {
+    if (index === currentWords.length - 1) {
         btnNext.disabled = true;
     }
     showProgress();
@@ -91,10 +94,10 @@ btnNext.onclick = function() {
 
 btnBack.onclick = function() {
     index = --index;
-    if (index == 0) {
+    if (index === 0) {
         btnBack.disabled = true;
     }
-    if (index < 5) {
+    if (index < currentWords.length - 1) {
         btnNext.disabled = false;
     }
     showProgress();
@@ -103,7 +106,7 @@ btnBack.onclick = function() {
 function shuffleCard(array) {
     let currentIndex = array.length,
         randomIndex;
-    while (currentIndex != 0) {
+    while (currentIndex !== 0) {
         randomIndex = Math.floor(Math.random() * currentIndex);
         currentIndex--;
         [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
@@ -150,10 +153,7 @@ function showExamProgress(value) {
 }
 
 btnExam.addEventListener('click', () => {
-    flipCard.classList.add('hidden');
-    btnBack.classList.add('hidden');
-    btnExam.classList.add('hidden');
-    btnNext.classList.add('hidden');
+    document.querySelector('.study-cards').classList.add('hidden');
     document.querySelector('#study-mode').classList.add('hidden');
     document.querySelector('#exam-mode').classList.remove('hidden');
     renderExamCard(mixCards(currentWords));
@@ -179,9 +179,11 @@ examCards.addEventListener("click", (event) => {
         firstCard = card;
         firstCardIndex = currentWords.findIndex((item) => item.word === card.textContent || item.translate === card.textContent);
         click = true;
-    } else if (click === true) {
+        firstCard.style.pointerEvents = "none";
+    } else {
         secondCard = card;
         secondCardIndex = currentWords.findIndex((item) => item.word === card.textContent || item.translate === card.textContent);
+        firstCard.style.pointerEvents = "all";
 
         if (firstCardIndex === secondCardIndex) {
             document.querySelector('#correct-percent').textContent = showExamProgress(endIndex) + '%';
@@ -190,6 +192,8 @@ examCards.addEventListener("click", (event) => {
             firstCard.classList.add("fade-out");
             secondCard.classList.add("correct");
             secondCard.classList.add("fade-out");
+            firstCard.style.pointerEvents = "none";
+            secondCard.style.pointerEvents = "none";
 
             if (endIndex === segment) {
                 clearInterval(timer);
@@ -202,8 +206,10 @@ examCards.addEventListener("click", (event) => {
             secondCard.classList.add("wrong");
             setTimeout(() => {
                 firstCard.classList.remove("correct");
-                secondCard.classList.remove("wrong");
+                secondCard.classList.remove('wrong');
             }, 500);
+
         }
+
     }
 });
